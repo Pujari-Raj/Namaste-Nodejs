@@ -1,0 +1,36 @@
+
+In both browser and Node.js environments, global objects like window, global, globalThis, and others play a central role in managing the execution context and scope of variables, functions, and other objects. Here’s an in-depth explanation of each:
+
+1. window object (Browser Only)
+The window object is the global object in the browser environment, representing the window or tab that contains the web page. It is automatically created by the browser and is responsible for providing access to the browser's API.
+- Holds references to all objects, functions, and variables declared globally in JavaScript (including document, location, etc.).
+
+2. global object (Node.js Only)
+The global object is the counterpart to window in a Node.js environment. In Node.js, the global object serves as the global namespace for all globally scoped variables and functions.
+
+Key Features:
+
+Provides access to globally available Node.js modules and utilities like setTimeout(), process, Buffer, require(), etc.
+
+3. globalThis (Universal)
+globalThis is a standardized global object that provides a unified way to access the global scope in both browser and Node.js environments (or any other JavaScript runtime).
+
+Key Features:
+
+Introduced in ECMAScript 2020, globalThis was created to solve the problem of accessing the global object in a platform-independent manner.
+In browsers, globalThis is equivalent to window.
+In Node.js, globalThis is equivalent to global.
+
+4. frames object (Browser Only)
+The frames object is a reference to all frames (including iframe elements) in a document. It’s part of the window object and allows access to the different frames within the browser’s window.
+
+Key Features:
+
+Provides access to each frame or iframe in a window.
+
+5. Safe Global Objects
+A "safe global object" refers to ensuring that the global objects like window, global, and globalThis are used without causing accidental pollutions or conflicts.
+
+Why it matters:
+
+Global objects are accessible anywhere in your code. Modifying or adding properties to them can lead to unexpected behavior.
