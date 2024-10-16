@@ -18,3 +18,7 @@
  * that means the code of the each & every file is wrapped inside the IIFE and it 
  * is available to export that code
  */
+
+(function (exports, require, module, __filename, __dirname) {
+    // ALL THE CODE OF OUR MODULE
+})
