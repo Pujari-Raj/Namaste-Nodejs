@@ -46,18 +46,37 @@ const app = express();
  * --> A redirect instruction telling the browser to go to a different location.
  */
 
+/**
+ * ✅ The order of routes matters because Express matches and handles routes in the order they are defined.
+ * 
+ * 1. Express processes routes from top to bottom
+ * When a request comes to your server (like GET /user), Express starts checking the routes you’ve defined from
+ * the top of the file to the bottom.
+ * As soon as it finds a matching route, and that route sends a response (res.send, res.json, res.end, etc.), it stops and doesn’t look at any further routes.
+ * 2. Why this matters?
+ * Because if a more generic route like / is placed before more specific routes like /user or /test, it will
+ * match everything, and Express won’t even reach the specific ones.
+ */
+
+const user = {
+  firstName: 'dhamu',
+  lastName: 'shamu'
+}
+
+app.get("/user", (req, res) => {
+  res.send({ message: "user-data", data: user });
+});
+
+app.post("/postUse", (req, resp) => {
+  resp.send('Data saved to DB');
+})
+
+
 app.use("/", (req, res) => {
   res.send("Hello from main route");
 });
 
-app.use("/test", (req, res) => {
-  res.send("hello from test route");
-});
 
-app.use("/user", (req, res) => {
-  res.send("hello from user route");
-
-});
 
 app.listen(8080, () => {
   console.log("Server is successfully listening on port 8080.");
