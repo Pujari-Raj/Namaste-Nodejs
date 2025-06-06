@@ -1,5 +1,4 @@
 # request params, query
-# regex in route , use of ?, + , (), *
 
 # 📚 Express.js Notes
 
