@@ -1,6 +1,9 @@
-# request params, query
 
-# 📚 Express.js Notes
+# 📺 Season02 Episode 04: Routing & Request Handlers
+
+## 📚 Express.js Notes
+
+---
 
 ## 🔹 What is `app.use()` in Express?
 
@@ -12,9 +15,9 @@ Middleware is a function that has access to:
 - The next middleware function in the application’s request-response cycle
 
 ### 🧩 Characteristics of `app.use()`
-- Path matching is **prefix-based**.
-- If we provide a path like `/` or `/api`, it matches **any route** that starts with that path.
-- Example: The following will match `/`, `/test`, `/user`, etc.
+- Path matching is **prefix-based**
+- If we provide a path like `/` or `/api`, it matches **any route** that starts with that path
+- ✅ Example: The following will match `/`, `/test`, `/user`, etc.
 
 ---
 
@@ -22,15 +25,16 @@ Middleware is a function that has access to:
 
 The `req` object contains all the information sent by the client to the server.
 
+### 📌 Key Features:
 - Holds all data sent from client to server
 - Tells the server what kind of action the user is requesting (GET, POST, PUT, DELETE)
-- Provides headers that give extra context:
+- Provides headers that give extra context
 
 ### 📄 Common Headers:
 - `Content-Type`: Tells the server what kind of data is being sent (e.g., JSON)
 - `Authorization`: Used for permission and authentication
 
-### 🗃 Body Data (for POST/PUT):
+### 🗃 Body Data (for POST/PUT requests):
 - The client might send form or JSON data along with the request
 
 ---
@@ -64,8 +68,6 @@ Place **specific routes first**, and **generic fallback routes (like `/`) last**
 
 ---
 
----
-
 ## 🔁 Using `nodemon` in Express Development
 
 ### 🤔 Why we need nodemon?
@@ -81,7 +83,45 @@ This makes development **slow and frustrating**.
 
 ### 💡 Example:
 Instead of running:
+
 ```bash
 node app.js
+```
 
-Happy Learning 🚀
+Run this instead:
+
+```bash
+npx nodemon app.js
+```
+
+---
+
+## 📘 What is Dynamic Routing?
+
+**Dynamic routing** in Express.js means creating routes that can accept **variable values** as part of the URL.  
+Instead of hardcoding specific paths, dynamic routes allow **placeholders** (called **route parameters**) that can change depending on the request.
+
+### 🧠 Why is it Used?
+
+Dynamic routing is used to:
+
+- Handle multiple similar requests using a **single route handler**
+- Fetch data based on parameters like `user ID`, `product ID`, `category`, `slug`, etc.
+- Keep your code **clean, reusable, and scalable**
+
+### ✅ Example:
+
+```js
+app.get("/user/:id", (req, res) => {
+  res.send(`User ID: ${req.params.id}`);
+});
+```
+
+### 📌 Real-World Examples:
+- `/user/123` → get profile for user 123
+- `/product/shoes/987` → show product with ID 987 in "shoes" category
+- `/blog/how-to-use-nodejs` → load a blog post using slug
+
+---
+
+🎉 **Happy Learning 🚀**
