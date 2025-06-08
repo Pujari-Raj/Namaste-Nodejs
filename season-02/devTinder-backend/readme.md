@@ -124,4 +124,4 @@ app.get("/user/:id", (req, res) => {
 
 ---
 
-🎉 **Happy Learning 🚀**
+# 📺 Season02 Episode 05: Middlewares & Error Handlers
