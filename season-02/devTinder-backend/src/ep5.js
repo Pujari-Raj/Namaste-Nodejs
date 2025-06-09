@@ -14,7 +14,20 @@ const app = express();
  * body were already sent, so Express throws the ERR_HTTP_HEADERS_SENT error.
  */
 
-// app.use('/route', rh1,rh2, rh3, rh4)
+/**
+ * 1. app.use("/route", () => {...})
+ * 2. [(req, resp, next) => {
+ * console.log('handlding the route user-2!');
+ *  // resp.send("2nd response")
+ *  next();
+ * }
+ * etc.
+ * this all are the middlewares 
+ * The function which sends which takes the request and sends back the response is known as the request handler
+ * In below example the last function is the request handler
+ */
+
+
 app.use("/user", (req, resp, next) => {
     console.log('handlding the route user-1!');
     // resp.send('hello user');
