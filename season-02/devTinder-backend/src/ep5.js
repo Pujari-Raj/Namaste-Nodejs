@@ -78,6 +78,7 @@ app.get("/admin/getAllUsers", (req, res) => {
 //     res.status(200).send("All User Data");
 // });
 
+// directly using auth from my auth.js file 
 app.get("/user", userAuth,(req, res) => {
     res.status(200).send("All User Data");
 });
