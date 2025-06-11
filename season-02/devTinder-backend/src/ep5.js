@@ -78,10 +78,25 @@ app.get("/admin/getAllUsers", (req, res) => {
 //     res.status(200).send("All User Data");
 // });
 
+
 // directly using auth from my auth.js file 
 app.get("/user", userAuth,(req, res) => {
-    res.status(200).send("All User Data");
+    try {
+        res.status(200).send("All User Data");
+    } catch (error) {
+        res.status(500).send("something went wrong contact support team")
+    }
 });
+
+
+//always add below middleware in last
+// when we user error in middleware it should always be first 
+// app.use("/", (err, req, res, next) => {...})
+app.use("/", (err, req, res, next) => {
+    if (err) {
+        res.status(500).send("something went wrong")
+    }
+})
 
 app.listen(8080, () => {
   console.log("Server is successfully listening on port 8080.");
