@@ -73,3 +73,53 @@ User.deleteOne({...})     // Delete user
 
 ### 📌 Naming Convention:
 If model name is `User`, MongoDB will use the `users` collection by default.
+
+# 📦 Understanding `express.json()` Middleware in Express
+
+## 🧾 What is `express.json()`?
+
+`express.json()` is a built-in middleware function in Express.js that parses incoming requests with JSON payloads and makes the parsed data available in `req.body`.
+
+---
+
+## 🔍 Why is it needed?
+
+When a client (like Postman, browser, or frontend app) sends a POST/PUT request with data in JSON format, the data comes as a **raw string**. For example:
+
+```json
+{
+  "firstName": "Javagal",
+  "age": 40
+}
+```
+
+But in the backend, it arrives like this:
+
+```text
+"{\"firstName\":\"Javagal\",\"age\":40}"
+```
+
+This raw JSON string needs to be parsed into a usable JavaScript object.
+
+---
+
+## ✅ What does `express.json()` do?
+
+It takes the raw string data in the request body and **converts it into a JavaScript object**.
+
+After parsing, you can easily access the data using:
+
+```js
+req.body.firstName // "Javagal"
+```
+
+---
+
+## 🛠 Behind the Scenes
+
+* Built on top of the `body-parser` middleware.
+* Only works with `Content-Type: application/json`.
+
+---
+
+Using `express.json()` is essential for handling JSON request bodies in modern web applications built with Express.
