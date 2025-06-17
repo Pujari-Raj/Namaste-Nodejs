@@ -16,10 +16,11 @@ connectToDB()
   .catch((error) => {
     console.error("Database connection failed", error);
   });
+  
 
 // signup user
 app.post("/signup", async (req, res) => {
-  console.log("request", req?.body);
+  // console.log("request", req?.body);
 
   const user = new UserModel(req.body);
 
@@ -27,8 +28,14 @@ app.post("/signup", async (req, res) => {
     await user.save();
     res.status(200).send("user Added successfully");
   } catch (error) {
-    console.log("error adding user", error);
-    res.status(400).send("error adding user", error);
+    // console.log("error adding user", error);
+    // res.status(400).send("error adding user"+error.message);
+     // Send proper error message if duplicate key error
+    if (error.code === 11000) {
+      res.status(400).send("Duplicate email: This email already exists");
+    } else {
+      res.status(400).send("Error adding user");
+    }
   }
 });
 
