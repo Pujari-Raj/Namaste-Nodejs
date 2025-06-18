@@ -34,7 +34,7 @@ app.post("/signup", async (req, res) => {
     if (error.code === 11000) {
       res.status(400).send("Duplicate email: This email already exists");
     } else {
-      res.status(400).send("Error adding user");
+      res.status(400).send(""+error.message);
     }
   }
 });
@@ -73,8 +73,8 @@ app.delete("/deleteUserById", async (req, res) => {
 });
 
 // update user by emailId
-app.patch("/updateUserByEmail", async (req, res) => {
-  const userEmail = req.query.emailId;
+app.patch("/updateUserByEmail/:emailId", async (req, res) => {
+  const userEmail = req.params.emailId;
   const updateData = req.body;
   console.log(`updateData ${updateData}`);
   
@@ -86,6 +86,30 @@ app.patch("/updateUserByEmail", async (req, res) => {
   }
 
   try {
+    //
+    const ALLOWED_UPDATES = ["gender", "password", "firstName", "lastName"]
+    // const isUpdateAllowed = Object.keys(updateData).every((k) => 
+    //   ALLOWED_UPDATES.includes(k)
+    // )
+
+    // if (!isUpdateAllowed) {
+    //   throw new Error ('cannot update certain field')
+    // }
+
+    const updateFields = Object.keys(updateData);
+
+     // Find disallowed fields
+    const invalidFields = updateFields.filter(
+      (field) => !ALLOWED_UPDATES.includes(field)
+    );
+
+    if (invalidFields.length > 0) {
+      return res.status(400).json({
+        message: "Invalid fields provided for update",
+        restrictedFields: invalidFields,
+      });
+    }
+
     const updatedUser = await UserModel.findOneAndUpdate(
       { emailId: userEmail },
       { $set: updateData },
