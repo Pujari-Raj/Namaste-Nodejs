@@ -1,6 +1,7 @@
 const express = require("express");
 const connectToDB = require("./config/database");
 const UserModel = require("./models/user");
+const { validateSignUpData } = require("./utils/validations");
 
 const app = express();
 
@@ -16,25 +17,28 @@ connectToDB()
   .catch((error) => {
     console.error("Database connection failed", error);
   });
-  
 
 // signup user
 app.post("/signup", async (req, res) => {
   // console.log("request", req?.body);
 
-  const user = new UserModel(req.body);
-
   try {
+    // validation of data 
+    validateSignUpData(req);
+
+    //
+
+    const user = new UserModel(req.body);
     await user.save();
     res.status(200).send("user Added successfully");
   } catch (error) {
     // console.log("error adding user", error);
     // res.status(400).send("error adding user"+error.message);
-     // Send proper error message if duplicate key error
+    // Send proper error message if duplicate key error
     if (error.code === 11000) {
       res.status(400).send("Duplicate email: This email already exists");
     } else {
-      res.status(400).send(""+error.message);
+      res.status(400).send("ERROR : " + error.message);
     }
   }
 });
@@ -77,7 +81,6 @@ app.patch("/updateUserByEmail/:emailId", async (req, res) => {
   const userEmail = req.params.emailId;
   const updateData = req.body;
   console.log(`updateData ${updateData}`);
-  
 
   if (!userEmail) {
     return res.status(400).json({
@@ -87,8 +90,8 @@ app.patch("/updateUserByEmail/:emailId", async (req, res) => {
 
   try {
     //
-    const ALLOWED_UPDATES = ["gender", "password", "firstName", "lastName"]
-    // const isUpdateAllowed = Object.keys(updateData).every((k) => 
+    const ALLOWED_UPDATES = ["gender", "password", "firstName", "lastName"];
+    // const isUpdateAllowed = Object.keys(updateData).every((k) =>
     //   ALLOWED_UPDATES.includes(k)
     // )
 
@@ -98,7 +101,7 @@ app.patch("/updateUserByEmail/:emailId", async (req, res) => {
 
     const updateFields = Object.keys(updateData);
 
-     // Find disallowed fields
+    // Find disallowed fields
     const invalidFields = updateFields.filter(
       (field) => !ALLOWED_UPDATES.includes(field)
     );
@@ -113,11 +116,10 @@ app.patch("/updateUserByEmail/:emailId", async (req, res) => {
     const updatedUser = await UserModel.findOneAndUpdate(
       { emailId: userEmail },
       { $set: updateData },
-      {new: true}
+      { new: true }
     ).exec();
 
     console.log(`updatedUser- ${updatedUser}`);
-    
 
     if (!updatedUser) {
       return res

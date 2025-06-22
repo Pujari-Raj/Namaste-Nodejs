@@ -10,9 +10,6 @@ const UserModel = require("../models/user");
 const connectToDB = async () => {
   try {
     await mongoose.connect("mongodb+srv://basvarajpujari607:mggIsHwhae2SY9gn@pujari-basvaraj.kswbskn.mongodb.net/test-dev-tinder");
-
-    console.log("Database connection established");
-
     // Very important: Sync indexes to ensure unique index is created
     await UserModel.syncIndexes();
     console.log("Indexes synced successfully");
