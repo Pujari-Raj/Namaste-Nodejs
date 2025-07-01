@@ -2,11 +2,14 @@ const express = require("express");
 const connectToDB = require("./config/database");
 const UserModel = require("./models/user");
 const { validateSignUpData } = require("./utils/validations");
-const bcrypt = require("bcrypt")
+const bcrypt = require("bcrypt");
+// for getting token
+const cookieParser = require("cookie-parser");
 
 const app = express();
 
 app.use(express.json());
+app.use(cookieParser())
 
 connectToDB()
   .then(() => {
@@ -76,6 +79,10 @@ app.post("/login", async (req, res) => {
     const ispasswordValid = await bcrypt.compare(password, user.password);
 
     if (ispasswordValid) {
+      // Create JWT Token
+
+      // Add token to cookie and send the response back to the user
+      res.cookie("token", "asbansahsabhsahmdsdjadvghavsagh2112")
       res.status(200).send('User Logged In Successfully')
     } else{
       throw new Error("Invalid Creds");
@@ -83,6 +90,16 @@ app.post("/login", async (req, res) => {
   } catch (error) {
     res.status(400).send("ERROR : " + error.message);
   }
+})
+
+//
+app.get("/profile",  async (req, res) => {
+  // getting token , we use req.cookies but we need cookie-parser package as well 
+  const cookies = req.cookies;
+
+  console.log('cookies',cookies);
+  
+  res.send("Profile, page, Reading cookie")
 })
 
 // get user by email
