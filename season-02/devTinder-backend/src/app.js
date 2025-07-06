@@ -6,6 +6,7 @@ const bcrypt = require("bcrypt");
 // for getting token
 const cookieParser = require("cookie-parser");
 const jwtToken = require("jsonwebtoken");
+const { userAuth } = require("./middlewares/auth");
 
 const app = express();
 
@@ -94,39 +95,14 @@ app.post("/login", async (req, res) => {
 });
 
 //
-app.get("/profile", async (req, res) => {
+// using userAuth middleware 
+app.get("/profile", userAuth,async (req, res) => {
   try {
-    // getting token , we use req.cookies but we need cookie-parser package as well
-    const cookies = req.cookies;
-
-    console.log("cookies", cookies);
-
-    const { token } = cookies;
-    console.log("token", token);
-
-    if (!token) {
-      throw new Error("Invalid Token");
-    }
-
-    // verifying which user is loggedIn
-    const decodedUserData = await jwtToken.verify(token, "SOUTH-DEV-TINDER");
-    console.log("decodedUserData", decodedUserData);
-
-    const { _id } = decodedUserData;
-    // console.log("user-Id", _id);
-
-    // getting userdata based on Id we got from token
-
-    const userData = await UserModel.findById(_id);
-    console.log('userData',userData);
-    
-    if (!userData) {
-      throw new Error("User Does not exist");
-    }
-    
+    // getting userData from request body from auth
+    const userData = req.user
     res.send(userData);
   } catch (err) {
-    res.status(400).send("error-", err.message);
+    res.status(400).send("error-"+err.message);
   }
 });
 
