@@ -79,30 +79,39 @@ app.post("/login", async (req, res) => {
     // validating password (checking the password enetred by user and in database)
     const ispasswordValid = await bcrypt.compare(password, user.password);
 
-    if (ispasswordValid) {
+    if (!ispasswordValid) {
       // Create JWT Token
-      const token = await jwtToken.sign({ _id: user._id }, "SOUTH-DEV-TINDER");
-
-      // Add token to cookie and send the response back to the user
-      res.cookie("token", token);
-      res.status(200).send("User Logged In Successfully");
-    } else {
+      // const token = await jwtToken.sign({ _id: user._id }, "SOUTH-DEV-TINDER", {
+      //   expiresIn: "1h",
+      // });
       throw new Error("Invalid Creds");
     }
+    const token = await user.getJWT();
+
+    if (!token) {
+      return res.status(500).send("Token generation failed");
+    }
+
+    // Add token to cookie and send the response back to the user
+    res.cookie("token", token, {
+      expires: new Date(Date.now() + 8 * 3600000), // cookie will be removed after 8 hours
+      httpOnly: true,
+    });
+    res.status(200).send("User Logged In Successfully");
   } catch (error) {
     res.status(400).send("ERROR : " + error.message);
   }
 });
 
 //
-// using userAuth middleware 
-app.get("/profile", userAuth,async (req, res) => {
+// using userAuth middleware
+app.get("/profile", userAuth, async (req, res) => {
   try {
     // getting userData from request body from auth
-    const userData = req.user
+    const userData = req.user;
     res.send(userData);
   } catch (err) {
-    res.status(400).send("error-"+err.message);
+    res.status(400).send("error-" + err.message);
   }
 });
 
