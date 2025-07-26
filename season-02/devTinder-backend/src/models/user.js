@@ -62,8 +62,6 @@ userSchema.methods.getJWT = async function () {
   return token;
 };
 
-
 const UserModel = mongoose.model("User", userSchema);
-
 
 module.exports = UserModel;
