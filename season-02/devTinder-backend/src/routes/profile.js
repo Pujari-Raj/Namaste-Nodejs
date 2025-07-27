@@ -1,12 +1,13 @@
 const express = require("express");
 const UserModel = require("../models/user");
 const { userAuth } = require("../middlewares/auth");
+const { validateProfileData } = require("../utils/validations");
 
 //
 const profileRouter = express.Router();
 
 // using userAuth middleware
-profileRouter.get("/profile", userAuth, async (req, res) => {
+profileRouter.get("/profile/view", userAuth, async (req, res) => {
   try {
     // getting userData from request body from auth
     const userData = req.user;
@@ -107,6 +108,48 @@ profileRouter.patch("/updateUserByEmail/:emailId", async (req, res) => {
   } catch (error) {
     console.error("Error updating user:", error);
     res.status(500).json({ message: "Error updating user", error });
+  }
+});
+
+// profile edit
+profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
+  try {
+    // validating user data
+    if (!validateProfileData(req)) {
+      return res.status(400).send("Invalid Edit Request");
+    }
+
+    //getting loggedInUser
+    const loggedInUser = req.user;
+    console.log("loggedInUser-before", loggedInUser);
+    Object.keys(req.body).forEach((key) => (loggedInUser[key] = req.body[key]));
+
+    console.log("loggedInUser-after", loggedInUser);
+
+    // storing new values of user in DB
+    await loggedInUser.save();
+
+    res.status(200).json({
+      message: "Profile Updated Successfully",
+      data: loggedInUser,
+    });
+  } catch (error) {
+    // res.status(400).send("Something went wrong", error.message);
+    // If the error is a Mongoose validation error (like skills > 5)
+    if (error.name === "ValidationError") {
+      const errors = Object.values(error.errors).map((err) => err.message);
+      return res.status(400).json({
+        success: false,
+        message: "Validation Failed",
+        errors,
+      });
+    }
+
+    // Catch-all for other unexpected errors
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Something went wrong",
+    });
   }
 });
 

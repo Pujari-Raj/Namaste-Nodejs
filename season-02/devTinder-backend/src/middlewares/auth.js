@@ -20,30 +20,43 @@ const userAuth = async (req, res, next) => {
     // console.log("token", token);
 
     if (!token) {
-      throw new Error("Invalid Token");
+      // throw new Error("Invalid Token");
+      return res.status(201).json({
+        success: false,
+        message: "You must be logged In",
+      });
     }
 
     // verifying which user is loggedIn
-    const decodedUserData = await jwtToken.verify(token, "SOUTH-DEV-TINDER");
-    // console.log("decodedUserData", decodedUserData);
-
-    const { _id } = decodedUserData;
-    // console.log("user-Id", _id);
-
-    // getting userdata based on Id we got from token
-
-    const userData = await UserModel.findById(_id);
-    // console.log("userData", userData);
-
-    if (!userData) {
-      throw new Error("User Does not exist");
+    // Case 2: Verify the token
+    let decodedUserData;
+    try {
+      decodedUserData = jwtToken.verify(token, "SOUTH-DEV-TINDER"); // Use process.env.JWT_SECRET in production
+    } catch (err) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid or expired token. Please login again.",
+      });
     }
 
-    // res.send(userData);
-    req.user = userData
+    // Case 3: Token valid but user not found in DB
+    const userData = await UserModel.findById(decodedUserData._id);
+    if (!userData) {
+      return res.status(404).json({
+        success: false,
+        message: "User no longer exists. Please register again.",
+      });
+    }
+
+    // All good, attach user and continue
+    req.user = userData;
     next();
   } catch (err) {
-    res.status(400).send("error-" + err.message);
+    console.error("Auth error:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong during authentication",
+    });
   }
 };
 

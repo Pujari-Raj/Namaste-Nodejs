@@ -38,6 +38,15 @@ const userSchema = new mongoose.Schema(
         }
       },
     },
+    skills: {
+      type: [String],
+      validate: {
+        validator: function (value) {
+          return value.length <= 5;
+        },
+        message: "You can add up to 5 skills only",
+      },
+    },
   },
   {
     timestamps: true,
