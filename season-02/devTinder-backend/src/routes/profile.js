@@ -2,6 +2,8 @@ const express = require("express");
 const UserModel = require("../models/user");
 const { userAuth } = require("../middlewares/auth");
 const { validateProfileData } = require("../utils/validations");
+const bcrypt = require("bcrypt");
+const validator = require("validator");
 
 //
 const profileRouter = express.Router();
@@ -149,6 +151,79 @@ profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
     return res.status(500).json({
       success: false,
       message: error.message || "Something went wrong",
+    });
+  }
+});
+
+// forgot-password
+profileRouter.patch("/profile/forgotpassword", userAuth, async (req, res) => {
+  try {
+    console.log("inside forgotpassword");
+
+    const { currentPassword, newPassword } = req.body;
+
+    console.log("currentPassword", currentPassword);
+    console.log("newPassword", newPassword);
+
+    //checking if fields are empty
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Both current and new passwords are required",
+      });
+    }
+
+    // validating password strength
+    if (!validator.isStrongPassword(newPassword)) {
+      return res.status(401).json({
+        success: false,
+        message:
+          "New password is too weak. Use at least 8 characters, including uppercase, lowercase, number, and symbol",
+      });
+    }
+
+    // checking if currentPassword , newPassword is same
+    // 3. Prevent setting same password
+    if (currentPassword === newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "New password cannot be the same as the current password",
+      });
+    }
+
+    //checking if current password is correct
+    const user = req.user;
+
+    const iscurrentPasswordValid = await bcrypt.compare(
+      currentPassword,
+      user.password
+    );
+
+    console.log("iscurrentPasswordValid", iscurrentPasswordValid);
+
+    if (!iscurrentPasswordValid) {
+      return res.status(401).json({
+        success: false,
+        message: "Current Password is incorrect",
+      });
+    }
+
+    // taking new passowrd and hashing
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    user.password = hashedPassword;
+
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Password has been reset successfully",
+    });
+  } catch (error) {
+    console.error("Reset password error:", error.message);
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong while resetting password",
     });
   }
 });
