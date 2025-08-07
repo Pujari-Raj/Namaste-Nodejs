@@ -4,6 +4,7 @@ const express = require("express");
 const connectionRequestModel = require("../models/connectionRequest");
 const { userAuth } = require("../middlewares/auth");
 const UserModel = require("../models/user");
+const { default: mongoose } = require("mongoose");
 
 //
 const connectionRequestRouter = express.Router();
@@ -19,7 +20,7 @@ connectionRequestRouter.post(
       const status = req.params.status;
 
       // 1. adding validation for status
-      const allowedStatusTypes = ["INTERESTED", "REJECTED"];
+      const allowedStatusTypes = ["INTERESTED", "IGNORED"];
       if (!allowedStatusTypes.includes(status)) {
         return res.status(400).json({
           success: false,
@@ -83,6 +84,91 @@ connectionRequestRouter.post(
         message:
           error.message ||
           "Something went wrong while sending connection request",
+      });
+    }
+  }
+);
+
+// review-connectionRequest
+
+connectionRequestRouter.post(
+  "/request/review/:status/:requestId",
+  userAuth,
+  async (req, res) => {
+    try {
+      //get value of status, requestId
+      const status = req.params.status;
+      const requestId = req.params.requestId;
+      const currentUserId = req.user._id;
+
+      //1.validating status types
+      const allowedStatusTypes = ["ACCEPTED", "REJECTED"];
+
+      if (!allowedStatusTypes.includes(status)) {
+        return res.status(400).json({
+          success: false,
+          message: `Invalid status. Allowed statuses: ${allowedStatusTypes.join(
+            ", "
+          )}`,
+        });
+      }
+
+      //2. validating ObjectId format
+      if (!mongoose.Types.ObjectId.isValid(requestId)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid connection request ID format.",
+        });
+      }
+
+      // 3. Find connection Request
+      const connectionRequest = await connectionRequestModel.findById(
+        requestId
+      );
+
+      // 4. Check if request exists
+      if (!connectionRequest) {
+        return res.status(404).json({
+          success: false,
+          message: "Connection request not found.",
+        });
+      }
+
+      //5. Ensuring current User is the receiver, bcz only the loggedInUser can accept/reject the connection request 
+      if (connectionRequest.toUserId.toString() !== currentUserId.toString()) {
+        return res.status(403).json({
+          success: false,
+          message: "You are not authorized to review this request.",
+        });
+      }
+
+      //6. Checking if request is already reviwed
+      if (allowedStatusTypes.includes(connectionRequest.status)) {
+        return res.status(409).json({
+          success: false,
+          message: `This connection request was already ${connectionRequest.status.toLowerCase()}.`,
+        });
+      }
+
+      // 7. updating status
+      connectionRequest.status = status;
+
+      connectionRequest.reviewdBy = currentUserId;
+
+      const updatedRequest = await connectionRequest.save();
+
+      return res.status(200).json({
+        success: true,
+        message: `Connection request ${status.toLowerCase()} successfully.`,
+        data: updatedRequest,
+      });
+    } catch (error) {
+      console.error("Error reviewing connection request", error.message);
+      return res.status(500).json({
+        success: false,
+        message:
+          error.message ||
+          "Something went wrong while reviewing connection request",
       });
     }
   }
