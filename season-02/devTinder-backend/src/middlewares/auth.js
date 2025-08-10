@@ -48,7 +48,7 @@ const userAuth = async (req, res, next) => {
       });
     }
 
-    // All good, attach user and continue
+    // if user exists , add userData into req.user
     req.user = userData;
     next();
   } catch (err) {

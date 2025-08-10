@@ -1,5 +1,3 @@
-// Routes for connectionRequest
-
 const express = require("express");
 const connectionRequestModel = require("../models/connectionRequest");
 const { userAuth } = require("../middlewares/auth");
