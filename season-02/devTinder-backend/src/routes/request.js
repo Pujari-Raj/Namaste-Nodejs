@@ -72,7 +72,8 @@ connectionRequestRouter.post(
 
       return res.status(200).json({
         success: true,
-        message: "Connection Request sent successfully",
+        // message: "Connection Request sent successfully",
+        message: req.user.firstName+"sent reuest to"+toUserId.firstName,
         data,
       });
     } catch (error) {
@@ -132,7 +133,7 @@ connectionRequestRouter.post(
         });
       }
 
-      //5. Ensuring current User is the receiver, bcz only the loggedInUser can accept/reject the connection request 
+      //5. Ensuring current User is the receiver, bcz only the loggedInUser can accept/reject the connection request
       if (connectionRequest.toUserId.toString() !== currentUserId.toString()) {
         return res.status(403).json({
           success: false,

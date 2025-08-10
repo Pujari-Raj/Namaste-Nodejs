@@ -1,14 +1,15 @@
 const mongoose = require("mongoose");
-const validator = require("validator");
 
 const connectionRequestSchema = new mongoose.Schema(
   {
     fromUserId: {
       required: true,
       type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
     },
     toUserId: {
       required: true,
+      ref: "User",
       type: mongoose.Schema.Types.ObjectId,
     },
     // enum
@@ -27,7 +28,7 @@ const connectionRequestSchema = new mongoose.Schema(
 );
 
 /**
- * .pre() is a Mongoose middleware that allows you to run logic before a document is saved, queried, updated 
+ * .pre() is a Mongoose middleware that allows you to run logic before a document is saved, queried, updated
  * or removed from the database.
  * but in our case it is not ideal to add a pre method because:-
  * - You can't send proper HTTP error response
@@ -47,8 +48,11 @@ const connectionRequestSchema = new mongoose.Schema(
 // adding index to connectionRequest table
 
 // adding indexing in ascending order
-connectionRequestSchema.index({fromUserId : 1, toUserId: 1})
+connectionRequestSchema.index({ fromUserId: 1, toUserId: 1 });
 
-const connectionRequestModel = mongoose.model("ConnectionRequest", connectionRequestSchema);
+const connectionRequestModel = mongoose.model(
+  "ConnectionRequest",
+  connectionRequestSchema
+);
 
-module.exports = connectionRequestModel
+module.exports = connectionRequestModel;
