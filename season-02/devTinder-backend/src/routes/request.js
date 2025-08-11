@@ -36,6 +36,7 @@ connectionRequestRouter.post(
 
       //3. Check if target user exists
       const ifToUserExist = await UserModel.findById(toUserId);
+      const toUserName = ifToUserExist?.firstName;
       if (!ifToUserExist) {
         return res.status(404).json({
           success: false,
@@ -53,10 +54,31 @@ connectionRequestRouter.post(
 
       // 5. if all checks are passed then save the connectionRequest
       if (existingRequest) {
-        return res.status(409).json({
+        // Case: There’s already an active or accepted connection
+        if (["INTERESTED"].includes(existingRequest.status)) {
+          return res.status(409).json({
+            success: false,
+            message:
+              "A connection request already exists between you and this user.",
+          });
+        }
+
+        // Case: retry after rejection -> updating record
+        if (existingRequest.status === "REJECTED" && status === "INTERESTED") {
+          existingRequest.status = "INTERESTED";
+          await existingRequest.save();
+          console.log("inside-rejction new");
+
+          return res.status(200).json({
+            success: true,
+            message: "New request sent after previous rejection.",
+            data: existingRequest,
+          });
+        }
+
+        return res.status(400).json({
           success: false,
-          message:
-            "A connection request already exists between you and this user.",
+          message: `Cannot send request. Current status: ${existingRequest.status}`,
         });
       }
 
@@ -73,7 +95,7 @@ connectionRequestRouter.post(
       return res.status(200).json({
         success: true,
         // message: "Connection Request sent successfully",
-        message: req.user.firstName+"sent reuest to"+toUserId.firstName,
+        message: req.user.firstName + " sent request to " + toUserName,
         data,
       });
     } catch (error) {
