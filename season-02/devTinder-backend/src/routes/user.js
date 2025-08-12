@@ -1,6 +1,7 @@
 const express = require("express");
 const { userAuth } = require("../middlewares/auth");
 const connectionRequest = require("../models/connectionRequest");
+const User = require("../models/user");
 
 const userRouter = express.Router();
 
@@ -10,6 +11,8 @@ userRouter.get("/user/requests/pending", userAuth, async (req, res) => {
     // getting user
     const loggedInUser = req.user;
 
+    // console.log('inside-pending');
+    
     // getting connectionRequests
     const connectionRequests = await connectionRequest
       .find({
@@ -18,7 +21,7 @@ userRouter.get("/user/requests/pending", userAuth, async (req, res) => {
       })
       .populate("fromUserId", "firstName lastName age gender skills");
 
-    // console.log("all -connectionRequests", connectionRequests);
+    // console.log("all-pending-connectionRequests", connectionRequests);
 
     return res.status(200).json({
       success: true,
@@ -101,6 +104,67 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
       message:
         error.message ||
         "Something went wrong while fetching connection requests",
+    });
+  }
+});
+
+// feed
+userRouter.get("/user/feed", userAuth, async (req, res) => {
+  try {
+    /**
+     * logic of building FEED api
+     * User should able to see all the user cards except
+     * 1. his own card
+     * 2. his connections (ACCEPTED)
+     * 3. ignored request (IGNORED)
+     * 4. rejected request (REJECTED)
+     * 5. already sent / received the connectionRequest
+     */
+
+    // getting loggedInUser
+    const loggedInUser = req.user;
+
+    // getting all connectionRequests (sent + received)
+    const connectionRequests = await connectionRequest
+      .find({
+        $or: [
+          { fromUserId: loggedInUser?._id },
+          { toUserId: loggedInUser?._id },
+        ],
+      })
+      .select("fromUserId toUserId")
+      .populate("fromUserId", "firstName")
+      .populate("toUserId", "firstName");
+
+    // console.log("all-connectionRequests", connectionRequests);
+
+    //step 2. hide above connectionRequests users
+    const hidUsersFromFeed = new Set();
+    connectionRequests.forEach((request) => {
+      hidUsersFromFeed.add(request?.fromUserId._id.toString());
+      hidUsersFromFeed.add(request?.toUserId._id.toString());
+    });
+
+    // console.log("hidingusers", hidUsersFromFeed);
+    // setp 3. fetch all the data except above hidingusers, loggedInUser data
+    const users = await User.find({
+      $and: [
+        { _id: { $nin: Array.from(hidUsersFromFeed) } },
+        { _id: { $ne: loggedInUser._id } },
+      ],
+    }).select("firstName lastName age gender skills");
+
+    // res.send(connectionRequests);
+    return res.status(200).json({
+      success: true,
+      message: "user feed fetched successfully",
+      users,
+    });
+  } catch (error) {
+    console.error("Error in fetching all feed ", error.message);
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Something went wrong while fetching feed data",
     });
   }
 });

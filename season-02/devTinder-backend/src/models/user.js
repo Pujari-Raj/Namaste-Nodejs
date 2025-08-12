@@ -61,7 +61,7 @@ userSchema.index({ emailId: 1 }, { unique: true });
 userSchema.methods.getJWT = async function () {
   // getting user
   const user = this;
-  console.log("user -in-model", user);
+  // console.log("user -in-model", user);
 
   // Create JWT Token
   const token = await jwtToken.sign({ _id: user._id }, "SOUTH-DEV-TINDER", {
