@@ -12,7 +12,7 @@ userRouter.get("/user/requests/pending", userAuth, async (req, res) => {
     const loggedInUser = req.user;
 
     // console.log('inside-pending');
-    
+
     // getting connectionRequests
     const connectionRequests = await connectionRequest
       .find({
@@ -124,6 +124,15 @@ userRouter.get("/user/feed", userAuth, async (req, res) => {
     // getting loggedInUser
     const loggedInUser = req.user;
 
+    // getting pagination params
+    const page = parseInt(req.query.page) || 1;
+    let pageSize = parseInt(req.query.pageSize) || 10;
+    pageSize = pageSize > 50 ? 50 : pageSize;
+
+    const startIndex = (page - 1) * pageSize;
+
+    console.log("page", page + " pageSize ", pageSize);
+
     // getting all connectionRequests (sent + received)
     const connectionRequests = await connectionRequest
       .find({
@@ -145,20 +154,46 @@ userRouter.get("/user/feed", userAuth, async (req, res) => {
       hidUsersFromFeed.add(request?.toUserId._id.toString());
     });
 
-    // console.log("hidingusers", hidUsersFromFeed);
-    // setp 3. fetch all the data except above hidingusers, loggedInUser data
-    const users = await User.find({
+    // filtering
+    const filters = {
       $and: [
         { _id: { $nin: Array.from(hidUsersFromFeed) } },
         { _id: { $ne: loggedInUser._id } },
       ],
-    }).select("firstName lastName age gender skills");
+    };
 
-    // res.send(connectionRequests);
+    // getting total count of users
+    const totalUsers = await User.countDocuments(filters);
+
+    const totalPages = Math.ceil(totalUsers / pageSize);
+    if (page > totalPages) {
+      return res.status(200).json({
+        success: true,
+        message: `No more users available. You have reached the last page (${totalPages}).`,
+        users: [],
+        page: page,
+        pageSize: pageSize,
+        totalUsers: totalUsers,
+      });
+    }
+
+    // console.log("totalUsers", totalUsers);
+
+    // console.log("hidingusers", hidUsersFromFeed);
+    // setp 3. fetch all the data of the filteredusers
+
+    const users = await User.find(filters)
+      .select("firstName lastName age gender skills")
+      .skip(startIndex)
+      .limit(pageSize);
+
     return res.status(200).json({
       success: true,
       message: "user feed fetched successfully",
       users,
+      page: page,
+      pageSize: pageSize,
+      totalUsers: totalUsers,
     });
   } catch (error) {
     console.error("Error in fetching all feed ", error.message);
