@@ -79,7 +79,11 @@ authRouter.post("/login", async (req, res) => {
       expires: new Date(Date.now() + 8 * 3600000), // cookie will be removed after 8 hours
       httpOnly: true,
     });
-    res.status(200).send("User Logged In Successfully");
+    res.status(200).json({
+      success: true,
+      message: "Logged In successfully",
+      data: user
+    });
   } catch (error) {
     res.status(400).send("ERROR : " + error.message);
   }
