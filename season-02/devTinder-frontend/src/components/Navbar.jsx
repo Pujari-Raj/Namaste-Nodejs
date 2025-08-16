@@ -1,12 +1,18 @@
-import React from "react";
+import { useSelector } from "react-redux";
 
 const Navbar = () => {
+
+  const user = useSelector((state) => state?.user);  
+  console.log('user-from redux',user);
+  
   return (
     <div className="navbar bg-base-100 shadow-sm">
       <div className="flex-1">
         <a className="btn btn-ghost text-xl">daisyUI</a>
       </div>
-      <div className="flex-none">
+      {user && (
+      <div className="flex justify-between items-center gap-x-3">
+        <div className="">Welcome, {user?.firstName}</div>
         <div className="dropdown dropdown-end">
           <div
             tabIndex={0}
@@ -39,6 +45,7 @@ const Navbar = () => {
           </ul>
         </div>
       </div>
+      )}
     </div>
   );
 };

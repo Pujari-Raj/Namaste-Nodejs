@@ -1,9 +1,12 @@
 import axios from "axios";
 import React, { useState } from "react";
+import { useDispatch } from "react-redux";
+import { addUser } from "../utils/userSlice";
 
 const Login = () => {
   const [email, setEmail] = useState("prasad@gmail.com");
   const [password, setPassword] = useState("Venky@007");
+  const dispatch = useDispatch();
 
   // login api
   const handleLogin = async (e) => {
@@ -11,14 +14,18 @@ const Login = () => {
       e.preventDefault();
       console.log("calling handlelogin functn");
 
-      const res = await axios.post("http://localhost:8080/login", {
-        emailId: email,
-        password: password,
-      }, 
-      { withCredentials: true } // why do I need to add this
-    );
+      const res = await axios.post(
+        "http://localhost:8080/login",
+        {
+          emailId: email,
+          password: password,
+        },
+        { withCredentials: true } // why do I need to add this
+      );
 
       console.log("res", res?.data?.data);
+      const userData = res?.data?.data;
+      dispatch(addUser(userData));
     } catch (err) {
       console.error("Login error:", err);
     }
