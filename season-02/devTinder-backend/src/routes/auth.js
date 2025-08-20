@@ -82,7 +82,7 @@ authRouter.post("/login", async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Logged In successfully",
-      data: user
+      data: user,
     });
   } catch (error) {
     res.status(400).send("ERROR : " + error.message);
@@ -91,13 +91,35 @@ authRouter.post("/login", async (req, res) => {
 
 // logout user
 
-authRouter.post("/logout", async(req, res) => {
-  // making the token null
-  res.cookie("token", null , {
-    expires: new Date(Date.now()),
-  })
+authRouter.post("/logout", async (req, res) => {
+  try {
+    //checking for token
+    // const token = req?.cookies?.token;
 
-  res.send("logged out Successfully")
-})
+    // if (!token) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: "User already logged out or not logged in",
+    //   });
+    // }
+
+    // making the token null
+    res.cookie("token", null, {
+      httpOnly: true,
+      sameSite: "strict",
+      expires: new Date(Date.now()),
+    });
+    res.status(200).json({
+      success: true,
+      message: "Logged out successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Logout failed",
+      error: err.message,
+    });
+  }
+});
 
 module.exports = authRouter;
