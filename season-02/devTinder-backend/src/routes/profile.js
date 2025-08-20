@@ -13,7 +13,11 @@ profileRouter.get("/profile/view", userAuth, async (req, res) => {
   try {
     // getting userData from request body from auth
     const userData = req.user;
-    res.send(userData);
+    res.status(200).json({
+      success : true,
+      message: "LoggedIn User Details",
+      data : userData
+    })
   } catch (err) {
     res.status(400).send("error-" + err.message);
   }

@@ -21,7 +21,7 @@ const userAuth = async (req, res, next) => {
 
     if (!token) {
       // throw new Error("Invalid Token");
-      return res.status(201).json({
+      return res.status(401).json({
         success: false,
         message: "You must be logged In",
       });
