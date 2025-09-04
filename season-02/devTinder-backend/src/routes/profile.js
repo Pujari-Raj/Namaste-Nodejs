@@ -118,7 +118,7 @@ profileRouter.patch("/updateUserByEmail/:emailId", async (req, res) => {
 });
 
 // profile edit
-profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
+profileRouter.patch("/profile/edit", userAuth, async (req, res) => {  
   try {
     // validating user data
     if (!validateProfileData(req)) {
