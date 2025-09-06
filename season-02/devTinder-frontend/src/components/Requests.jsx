@@ -7,6 +7,19 @@ const Requests = () => {
   const requests = useSelector((store) => store.requests);
   const dispatch = useDispatch();
 
+  const reviewRequest = async (status, _id) => {
+    try {
+      const res = await axios.post(`http://localhost:8080/request/review/${status}/${_id}`, {}, {
+        withCredentials : true
+      })
+      // removing request from redux
+      dispatch(removeRequest(_id))
+
+    } catch (error) {
+      console.log('error reviewing request',error);  
+    }
+  }
+
   const fetchRequests = async () => {
     try {
       const res = await axios.get("http://localhost:8080/user/requests/pending", {
@@ -43,13 +56,13 @@ const Requests = () => {
             key={_id}
             className=" flex justify-between items-center m-4 p-4 rounded-lg bg-base-300  mx-auto"
           >
-            <div>
+            {/* <div>
               <img
                 alt="photo"
                 className="w-20 h-20 rounded-full"
                 src={photoUrl}
               />
-            </div>
+            </div> */}
             <div className="text-left mx-4 ">
               <h2 className="font-bold text-xl">
                 {firstName + " " + lastName}
@@ -57,20 +70,20 @@ const Requests = () => {
               {age && gender && <p>{age + ", " + gender}</p>}
               <p>{about}</p>
             </div>
-            {/* <div>
+            <div>
               <button
                 className="btn btn-primary mx-2"
-                onClick={() => reviewRequest("rejected", request._id)}
+                onClick={() => reviewRequest("REJECTED", request._id)}
               >
                 Reject
               </button>
               <button
                 className="btn btn-secondary mx-2"
-                onClick={() => reviewRequest("accepted", request._id)}
+                onClick={() => reviewRequest("ACCEPTED", request._id)}
               >
                 Accept
               </button>
-            </div> */}
+            </div>
           </div>
         );
       })}
