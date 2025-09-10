@@ -5,32 +5,43 @@ import { addUser } from "../utils/userSlice";
 import { useNavigate } from "react-router-dom";
 
 const Login = () => {
-  const [email, setEmail] = useState("kingOfCricket@gmail.com");
-  const [password, setPassword] = useState("KingOfTest@0018");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [isLoginForm, setIsLoginForm] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // login api
-  const handleLogin = async (e) => {
+
+  // handle form submit
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     try {
-      e.preventDefault();
-      console.log("calling handlelogin functn");
+      const url = isLoginForm
+        ? "http://localhost:8080/login"
+        : "http://localhost:8080/signup";
 
-      const res = await axios.post(
-        "http://localhost:8080/login",
-        {
-          emailId: email,
-          password: password,
-        },
-        { withCredentials: true } // why do I need to add this
-      );
+      const payload = isLoginForm
+        ? { emailId: email, password }
+        : { firstName, lastName, emailId: email, password };
 
-      console.log("res", res?.data?.data);
-      const userData = res?.data?.data;
-      dispatch(addUser(userData));
-      navigate("/");
-    } catch (err) {
-      console.error("Login error:", err);
+      const res = await axios.post(url, payload, {
+        withCredentials: true,
+      });
+
+      if (isLoginForm) {
+        const userData = res?.data?.data;
+        dispatch(addUser(userData));
+        navigate("/");
+      } else {
+        alert("signup successful");
+        setIsLoginForm(true);
+      }
+    } catch (error) {
+      console.error(`${isLoginForm ? "Login" : "Signup"}`, error);
     }
   };
 
@@ -38,8 +49,40 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-base-200">
       <div className="card w-96 bg-base-100 shadow-xl">
         <div className="card-body">
-          <h2 className="card-title text-center">Login</h2>
-          <form>
+          <h2 className="card-title text-center">
+            {isLoginForm ? "Login" : "SignUp"}
+          </h2>
+          <form onSubmit={handleSubmit}>
+            {!isLoginForm && (
+              <>
+                <label className="form-control w-full mb-4">
+                  <div className="label">
+                    <span className="label-text">FirstName</span>
+                  </div>
+                  <input
+                    type="name"
+                    placeholder="Enter your name"
+                    className="input input-bordered w-full"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    required
+                  />
+                </label>
+                <label className="form-control w-full mb-4">
+                  <div className="label">
+                    <span className="label-text">LastName</span>
+                  </div>
+                  <input
+                    type="name"
+                    placeholder="Enter your LastName"
+                    className="input input-bordered w-full"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    required
+                  />
+                </label>
+              </>
+            )}
             <label className="form-control w-full mb-4">
               <div className="label">
                 <span className="label-text">Email</span>
@@ -54,27 +97,39 @@ const Login = () => {
               />
             </label>
 
-            <label className="form-control w-full mt-12">
-              <div className="label">
-                <span className="label-text">Password</span>
-              </div>
+            <div className="relative mb-3">
               <input
-                type="password"
-                placeholder="Enter your password"
-                className="input input-bordered w-full"
-                value={password}
+                type={showPassword ? "text" : "password"}
+                name="password"
+                placeholder="Password"
+                className="w-full p-2 border rounded-lg pr-10"
                 onChange={(e) => setPassword(e.target.value)}
-                required
               />
-            </label>
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-2 top-2 text-gray-600"
+              >
+                {showPassword ? "🙈" : "👁️"}
+              </button>
+            </div>
 
             <button
               type="submit"
               className="btn btn-primary w-full mt-4"
-              onClick={handleLogin}
+              // onClick={handleLogin}
             >
-              Login
+              {isLoginForm ? "Login" : "SignUp"}
             </button>
+
+            <p
+              onClick={() => setIsLoginForm(!isLoginForm)}
+              className="mt-4 text-center text-sm text-blue-600 cursor-pointer hover:underline"
+            >
+              {isLoginForm
+                ? "New user? Create an account"
+                : "Already have an account? Log in"}
+            </p>
           </form>
         </div>
       </div>

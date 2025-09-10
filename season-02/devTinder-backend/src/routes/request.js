@@ -7,6 +7,7 @@ const { default: mongoose } = require("mongoose");
 //
 const connectionRequestRouter = express.Router();
 
+// send/ignore request
 connectionRequestRouter.post(
   "/request/send/:status/:toUserId",
   userAuth,

@@ -28,15 +28,22 @@ authRouter.post("/signup", async (req, res) => {
       password: passwordHash,
     });
     await user.save();
-    res.status(200).send("user Added successfully");
+    res.status(201).json({
+      data: user,
+      message: "user Added successfully",
+    });
   } catch (error) {
     // console.log("error adding user", error);
     // res.status(400).send("error adding user"+error.message);
     // Send proper error message if duplicate key error
     if (error.code === 11000) {
-      res.status(400).send("Duplicate email: This email already exists");
+      res.status(400).json({
+        error: "Duplicate email: This email already exists",
+      });
     } else {
-      res.status(400).send("ERROR : " + error.message);
+      res.status(400).json({
+        error: error.message,
+      });
     }
   }
 });

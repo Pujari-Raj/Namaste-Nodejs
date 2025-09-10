@@ -6,7 +6,7 @@ import UserCard from "./UserCard";
 
 const Feed = () => {
   const dispatch = useDispatch();
-  const feedData = useSelector((store) => store?.feed)
+  const feedData = useSelector((store) => store?.feed);
   // const navigate = useNavigate();
   // getting all feed data
   const getFeedData = async () => {
@@ -22,21 +22,20 @@ const Feed = () => {
         dispatch(addFeed(feedData));
       }
     } catch (error) {
-      console.log('error fetching user data',error.message);
+      console.log("error fetching user data", error.message);
     }
   };
 
   useEffect(() => {
     getFeedData();
-  }, [])
-  
-  return (
-    <>
-      {feedData && (
-        <UserCard userDetails={feedData[0]} />
-      )}
-    </>
-  );
+  }, []);
+
+  if (!feedData) return;
+
+  if (feedData.length === 0)
+    return <h1 className="flex justify-center my-10"> No Users Found</h1>;
+
+  return <>{feedData && <UserCard userDetails={feedData[0]} />}</>;
 };
 
 export default Feed;
