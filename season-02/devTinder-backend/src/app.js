@@ -4,11 +4,14 @@ const connectToDB = require("./config/database");
 // for getting token
 const cookieParser = require("cookie-parser");
 // const jwtToken = require("jsonwebtoken");
+const http = require("http");
+
 
 const app = express();
 
 app.use(express.json());
 app.use(cookieParser());
+
 
 // getting all routers
 
@@ -17,6 +20,7 @@ const profileRouter = require("./routes/profile");
 const connectionRequestRouter = require("./routes/request");
 const userRouter = require("./routes/user");
 const cors = require("cors");
+const initializeSocket = require("./utils/socket");
 
 const corsOptions = {
   origin: "http://localhost:5173",
@@ -31,10 +35,16 @@ app.use("/", profileRouter);
 app.use("/", connectionRequestRouter);
 app.use("/", userRouter);
 
+// creating server
+const server = http.createServer(app);
+
+//
+initializeSocket(server)
+
 connectToDB()
   .then(() => {
     console.log("Database connection established");
-    app.listen(8080, () => {
+    server.listen(8080, () => {
       console.log("Server is successfully listening on port 8080.");
     });
   })
