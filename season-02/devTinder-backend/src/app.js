@@ -6,12 +6,10 @@ const cookieParser = require("cookie-parser");
 // const jwtToken = require("jsonwebtoken");
 const http = require("http");
 
-
 const app = express();
 
 app.use(express.json());
 app.use(cookieParser());
-
 
 // getting all routers
 
@@ -35,11 +33,11 @@ app.use("/", profileRouter);
 app.use("/", connectionRequestRouter);
 app.use("/", userRouter);
 
-// creating server
+// explicitly creating http server
 const server = http.createServer(app);
 
-//
-initializeSocket(server)
+// attaching socket.io to above server
+initializeSocket(server);
 
 connectToDB()
   .then(() => {
