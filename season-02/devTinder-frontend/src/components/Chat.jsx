@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import { createSocketConnection } from "../utils/socket";
+import axios from "axios";
 
 const Chat = () => {
   const [messages, setMessages] = useState([]);
@@ -14,6 +15,40 @@ const Chat = () => {
   const userId = user?._id;
   const firstName = user?.firstName;
   //   console.log("fromUserId", userId + " toUserId ", toUserId);
+  console.log("messages", messages);
+
+  // fetching chat Message
+  const fetchMessages = async () => {
+    try {
+      const res = await axios.get(`http://localhost:8080/chat/${toUserId}`, {
+        withCredentials: true,
+      });
+
+      console.log("chat-messages", res?.data?.messages);
+
+      if (res?.data?.data?.messages) {
+        console.log("inside-if");
+
+        const chatMessages = res?.data?.data?.messages?.map((message) => {
+          console.log("single-message", message);
+
+          const { senderId, text } = message;
+          return {
+            firstName: senderId?.firstName,
+            text,
+          };
+        });
+
+        setMessages(chatMessages);
+      }
+    } catch (error) {
+      console.log("error fetching chat messages", error.message);
+    }
+  };
+
+  useEffect(() => {
+    fetchMessages();
+  }, []);
 
   useEffect(() => {
     /**
@@ -57,17 +92,24 @@ const Chat = () => {
 
       {/* Chat Messages */}
       <div className="flex-1 p-4 overflow-y-auto bg-base-100">
-        {messages.map((msg) => (
-          <div
-            key={msg?.firstName}
-            className={`chat ${
-              msg.sender === "me" ? "chat-end" : "chat-start"
-            }`}
-          >
-            {msg?.firstName}
-            <div className="chat-bubble">{msg?.newMessage}</div>
-          </div>
-        ))}
+        {messages.map((msg, index) => {
+          return (
+            <div
+              key={index}
+              className={
+                "chat " +
+                (user?.firstName === msg?.firstName ? "chat-end" : "chat-start")
+              }
+            >
+              <div className="chat-header">
+                {`${msg.firstName}  ${msg.lastName}`}
+                <time className="text-xs opacity-50"> 2 hours ago</time>
+              </div>
+              <div className="chat-bubble">{msg.text}</div>
+              <div className="chat-footer opacity-50">Seen</div>
+            </div>
+          );
+        })}
       </div>
 
       {/* Chat Input */}
