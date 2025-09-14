@@ -40,3 +40,12 @@ CONNECTION STATUS - IGNORED, INTERESTED, ACCEPTED, REJECTED
 
 - GET /macthes
 - GET /messages
+
+# homework (features that can be added)
+- proper UI
+- proper ToastMessages, loading states
+- 
+-> Real Time Using websocket
+-> Fix Bugs- 1. Auth in web sockets 2. If I am not connected with someone , then I should not be able to send Message to that user
+-> Add on - show when user is live, last seen, 
+-> limit messages when messages are fetched initially, can implement pagination to get message7
